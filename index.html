@@ -30,16 +30,18 @@
     .list>div{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#0b1426;border:1px solid var(--border);border-radius:14px;padding:10px}
     .muted{color:var(--dim)}
 
-    .table{width:100%;border-collapse:separate;border-spacing:0 8px}
     .head{display:grid;grid-template-columns:1.3fr 80px 110px 110px 110px 32px;gap:8px;color:var(--dim);font-size:12px}
     .line{display:grid;grid-template-columns:1.3fr 80px 110px 110px 110px 32px;gap:8px;align-items:center}
     .line>div,.line>button{background:#0b1426;border:1px solid var(--border);border-radius:12px;padding:10px}
-    .line input[type=number]{width:100%}
 
-    .totals{display:grid;grid-template-columns:1fr 260px;gap:14px}
+    .totals{display:grid;grid-template-columns:1fr 280px;gap:14px}
     .box{background:#0b1426;border:1px solid var(--border);border-radius:16px;padding:14px}
-    .kv{display:flex;justify-content:space-between;margin:6px 0}
-    .kv strong{font-size:18px}
+    .kv{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed #2a3752}
+    .kv:last-child{border-bottom:none}
+    .amount{font-weight:700;font-size:18px}
+    .savings{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,rgba(34,211,163,.18),rgba(34,211,163,.08));border:1px solid rgba(34,211,163,.35);border-radius:12px;padding:10px;margin-top:8px}
+    .savings .label{display:flex;align-items:center;gap:8px}
+    .spark{width:10px;height:10px;border-radius:999px;background:var(--brand);box-shadow:0 0 0 6px rgba(34,211,163,.18)}
 
     .right{display:flex;flex-direction:column;gap:12px}
     .quote-list{max-height:44vh;overflow:auto}
@@ -69,15 +71,15 @@
   <!-- CENTER: Cart -->
   <div class="card">
     <p class="section">Plan</p>
-    <div class="head"><div>Procedure</div><div>Qty</div><div>Original</div><div>Advertised</div><div>Your Offer</div><div></div></div>
+    <div class="head"><div>Procedure</div><div>Qty</div><div>Original</div><div>Discounted</div><div>Your Offer</div><div></div></div>
     <div id="cart"></div>
 
     <div class="totals" style="margin-top:10px">
       <div class="box">
-        <div class="kv"><span class="muted">Original total</span><strong id="t_orig">—</strong></div>
-        <div class="kv"><span class="muted">Advertised baseline</span><strong id="t_adv">—</strong></div>
-        <div class="kv"><span>Patient pays</span><strong id="t_pay">—</strong></div>
-        <div class="kv"><span class="muted">Savings vs original</span><strong id="t_sav">—</strong></div>
+        <div class="kv"><span class="muted">Original total</span><span id="t_orig" class="amount">—</span></div>
+        <div class="kv"><span class="muted">Discounted baseline</span><span id="t_disc" class="amount">—</span></div>
+        <div class="kv"><span>Patient pays</span><span id="t_pay" class="amount">—</span></div>
+        <div class="savings"><div class="label"><div class="spark"></div><strong>Savings vs original</strong></div><div id="t_sav" class="amount">—</div></div>
       </div>
       <div class="box">
         <div class="col">
@@ -95,20 +97,24 @@
     <div id="quotes" class="quote-list"></div>
     <p class="section" style="margin-top:8px">Connection</p>
     <div class="col">
-      <input id="url" placeholder="Supabase URL">
-      <input id="key" placeholder="Supabase anon key">
+      <input id="url" placeholder="Supabase URL" value="https://tbmfvxsogydgfcpsqlcv.supabase.co">
+      <input id="key" placeholder="Supabase anon key" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRibWZ2eHNvZ3lkZ2ZjcHNxbGN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NTE5OTcsImV4cCI6MjA3NzEyNzk5N30.0WDzqjn0GNmkWMWQjlQ-OxDe2YVM0c2WCdb_GYA1yYo">
       <div class="row"><button id="connect" class="primary">Connect</button><button id="disconnect" class="ghost">Disconnect</button></div>
-      <div class="muted" style="font-size:12px">Set once — saved locally. Floors are hidden but enforced automatically. If no floor is set, we use the Advertised price as the minimum.</div>
+      <div class="muted" style="font-size:12px">Floors are hidden but enforced. If no floor, the Discounted amount is the minimum (else Original).</div>
     </div>
   </div>
 </div>
 
 <script type="module">
+  // Auto-inject credentials so it connects on load as requested
+  window.__SUPABASE_URL__ = "https://tbmfvxsogydgfcpsqlcv.supabase.co";
+  window.__SUPABASE_ANON__ = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRibWZ2eHNvZ3lkZ2ZjcHNxbGN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NTE5OTcsImV4cCI6MjA3NzEyNzk5N30.0WDzqjn0GNmkWMWQjlQ-OxDe2YVM0c2WCdb_GYA1yYo";
+
   const $ = (s)=>document.querySelector(s);
   const currency = (n)=> (n==null||isNaN(n))? '—' : new Intl.NumberFormat('en-PK',{style:'currency',currency:'PKR',maximumFractionDigits:0}).format(n);
   const toNum=(s)=> Number(String(s).replace(/[^\d.]/g,''))||0;
 
-  let supa=null; let online=false; let catalog=[]; let cart=[]; const quotesKey='revive_quotes_v4';
+  let supa=null; let online=false; let catalog=[]; let cart=[]; const quotesKey='revive_quotes_v41';
 
   async function ensureSupabase(){
     if(supa) return supa;
@@ -116,7 +122,7 @@
     const url = window.__SUPABASE_URL__ || localStorage.getItem('revive_supa_url') || $('#url').value.trim();
     const key = window.__SUPABASE_ANON__ || localStorage.getItem('revive_supa_key') || $('#key').value.trim();
     if(!url||!key) throw new Error('Missing Supabase URL or anon key');
-    supa = createClient(url,key); return supa;
+    supa = createClient(url, key); return supa;
   }
 
   function setStatus(txt, ok=true){ const el=$('#status'); el.textContent=txt; el.className='badge'+(ok?'':' badgered'); }
@@ -131,15 +137,15 @@
   function disconnect(){ localStorage.removeItem('revive_supa_url'); localStorage.removeItem('revive_supa_key'); supa=null; online=false; setStatus('Disconnected',false); }
 
   async function loadCatalog(){
-    try{ const sb=await ensureSupabase(); const { data, error } = await sb.from('catalog').select('*').order('name'); if(error) throw error; catalog=data||[]; renderResults(); setStatus('Catalog: Supabase ('+catalog.length+')'); }
+    try{ const sb=await ensureSupabase(); const { data, error } = await sb.from('catalog').select('*').order('name'); if(error) throw error; catalog=data||[]; renderResults(); setStatus('Connected'); }
     catch(e){ console.error(e); setStatus('Catalog error',false); }
   }
 
   function minUnit(item, qty){
-    // Minimum allowed unit: floor; if floor missing -> advertised; if missing -> original.
-    const floor = item.floor!=null? item.floor : (item.advertised!=null? item.advertised : item.original);
-    let min = floor||0;
-    // Bundles may lower per-unit if qty >= min_qty
+    // Minimum allowed: floor; if no floor -> discounted (advertised); if none -> original
+    const baseMin = (item.floor!=null? item.floor : (item.advertised!=null? item.advertised : item.original)) || 0;
+    let min = baseMin;
+    // Apply bundle floors (if qty qualifies)
     (item.bundles||[]).forEach(b=>{
       if(qty>=b.min_qty){
         if(b.type==='unit_price_for_min_qty' && b.unit_price!=null) min = Math.max(min, b.unit_price);
@@ -155,7 +161,7 @@
     if(items.length===0){ list.innerHTML='<div class="muted" style="font-size:12px">No results.</div>'; return; }
     items.slice(0,250).forEach(it=>{
       const row=document.createElement('div');
-      row.innerHTML=`<div class=col style=gap:2px><div><strong>${it.name}</strong></div><div class=muted style=font-size:12px>Orig ${currency(it.original)}${it.advertised?` • Adv ${currency(it.advertised)}`:''}</div></div><button data-id="${it.id}" class=ghost>Add</button>`;
+      row.innerHTML=`<div class=col style=gap:2px><div><strong>${it.name}</strong></div><div class=muted style=font-size:12px>Orig ${currency(it.original)}${it.advertised?` • Disc ${currency(it.advertised)}`:''}</div></div><button data-id="${it.id}" class=ghost>Add</button>`;
       row.querySelector('button').addEventListener('click',()=>add(it.id));
       list.appendChild(row);
     });
@@ -166,15 +172,15 @@
 
   function clampAll(){ cart.forEach(l=>{ const it=catalog.find(x=>x.id===l.id); const min=minUnit(it,l.qty); if(l.offer<min) l.offer=min; }); }
 
-  function renderCart(){ const wrap=$('#cart'); wrap.innerHTML=''; cart.forEach(l=>{ const it=catalog.find(x=>x.id===l.id); const adv=it.advertised??null; const line=document.createElement('div'); line.className='line'; const min=minUnit(it,l.qty); line.innerHTML=`<div><div><strong>${it.name}</strong></div><div class=muted style=font-size:12px>${it.category||''}</div></div><div><input class=qty type=number min=1 step=1 value="${l.qty}"></div><div>${currency(it.original)}</div><div>${adv?currency(adv):'<span class=muted>—</span>'}</div><div><input class=offer type=number step=100 min="${min}" value="${l.offer}"></div><div><button class=ghost title=Remove>✕</button></div>`; const qty=line.querySelector('.qty'); const offer=line.querySelector('.offer'); const rm=line.querySelector('button'); qty.addEventListener('input',()=>{ l.qty=Math.max(1,parseInt(qty.value||1)); const m=minUnit(it,l.qty); if(l.offer<m){ l.offer=m; offer.value=m; } offer.min=m; totals(); }); offer.addEventListener('input',()=>{ let v=parseInt(offer.value||0); const m=minUnit(it,l.qty); if(isNaN(v)) v=m; if(v<m) v=m; offer.value=v; l.offer=v; totals(); }); rm.addEventListener('click',()=>removeLine(l.id)); wrap.appendChild(line); }); totals(); }
+  function renderCart(){ const wrap=$('#cart'); wrap.innerHTML=''; cart.forEach(l=>{ const it=catalog.find(x=>x.id===l.id); const disc=it.advertised??null; const line=document.createElement('div'); line.className='line'; const min=minUnit(it,l.qty); line.innerHTML=`<div><div><strong>${it.name}</strong></div><div class=muted style=font-size:12px>${it.category||''}</div></div><div><input class=qty type=number min=1 step=1 value="${l.qty}"></div><div>${currency(it.original)}</div><div>${disc?currency(disc):'<span class=muted>—</span>'}</div><div><input class=offer type=number step=100 min="${min}" value="${l.offer}"></div><div><button class=ghost title=Remove>✕</button></div>`; const qty=line.querySelector('.qty'); const offer=line.querySelector('.offer'); const rm=line.querySelector('button'); qty.addEventListener('input',()=>{ l.qty=Math.max(1,parseInt(qty.value||1)); const m=minUnit(it,l.qty); if(l.offer<m){ l.offer=m; offer.value=m; } offer.min=m; totals(); }); offer.addEventListener('input',()=>{ let v=parseInt(offer.value||0); const m=minUnit(it,l.qty); if(isNaN(v)) v=m; if(v<m) v=m; offer.value=v; l.offer=v; totals(); }); rm.addEventListener('click',()=>removeLine(l.id)); wrap.appendChild(line); }); totals(); }
 
-  function totals(){ let orig=0, adv=0, pay=0; cart.forEach(l=>{ const it=catalog.find(x=>x.id===l.id); orig+=(it.original||0)*l.qty; const a=(it.advertised??it.original)||0; adv+=a*l.qty; pay+=l.offer*l.qty; }); $('#t_orig').textContent=currency(orig); $('#t_adv').textContent=currency(adv); $('#t_pay').textContent=currency(pay); $('#t_sav').textContent=currency(Math.max(0,orig-pay)); }
+  function totals(){ let orig=0, disc=0, pay=0; cart.forEach(l=>{ const it=catalog.find(x=>x.id===l.id); orig+=(it.original||0)*l.qty; const d=(it.advertised??it.original)||0; disc+=d*l.qty; pay+=l.offer*l.qty; }); $('#t_orig').textContent=currency(orig); $('#t_disc').textContent=currency(disc); $('#t_pay').textContent=currency(pay); $('#t_sav').textContent=currency(Math.max(0,orig-pay)); }
 
   // Quotes
   function getLocal(){ try{return JSON.parse(localStorage.getItem(quotesKey)||'[]');}catch{return []} }
   function setLocal(x){ localStorage.setItem(quotesKey, JSON.stringify(x)); }
 
-  async function save(){ if(cart.length===0){ alert('Add at least one item.'); return; } const id='q_'+Math.random().toString(36).slice(2,9); const items=cart.map(l=>({ id:l.id, name:catalog.find(x=>x.id===l.id)?.name||l.id, qty:l.qty, offer:l.offer })); const total=toNum($('#t_pay').textContent); const rec={ id, ts:Date.now(), label:$('#label').value.trim(), patient:$('#patient').value.trim(), notes:$('#notes').value.trim(), items, totals:{ orig:toNum($('#t_orig').textContent), adv:toNum($('#t_adv').textContent), pay:total } };
+  async function save(){ if(cart.length===0){ alert('Add at least one item.'); return; } const id='q_'+Math.random().toString(36).slice(2,9); const items=cart.map(l=>({ id:l.id, name:catalog.find(x=>x.id===l.id)?.name||l.id, qty:l.qty, offer:l.offer })); const rec={ id, ts:Date.now(), label:$('#label').value.trim(), patient:$('#patient').value.trim(), notes:$('#notes').value.trim(), items, totals:{ orig:toNum($('#t_orig').textContent), disc:toNum($('#t_disc').textContent), pay:toNum($('#t_pay').textContent) } };
     if(online){ try{ const sb=await ensureSupabase(); const { error } = await sb.from('quotes').upsert(rec); if(error) throw error; } catch(e){ console.warn(e); const arr=getLocal(); arr.push(rec); setLocal(arr); } } else { const arr=getLocal(); arr.push(rec); setLocal(arr); }
     renderQuotes(); alert('Quote saved.'); }
 
@@ -195,8 +201,7 @@
   let patient=false; function setPv(){ document.body.classList.toggle('patient-view',patient); $('#patientBtn').textContent = patient? 'Switch to Manager View':'Switch to Patient View'; }
   $('#patientBtn').addEventListener('click', ()=>{ patient=!patient; setPv(); });
 
-  (async()=>{ try{ if((window.__SUPABASE_URL__&&window.__SUPABASE_ANON__)||(localStorage.getItem('revive_supa_url')&&localStorage.getItem('revive_supa_key'))){ await connect(); } else { setStatus('Enter URL & key → Connect', false); } } catch(e){ setStatus('Not connected', false); }
-    renderQuotes(); setPv(); })();
+  (async()=>{ try{ await connect(); } catch(e){ setStatus('Not connected', false); } renderQuotes(); setPv(); })();
 </script>
 </body>
 </html>
