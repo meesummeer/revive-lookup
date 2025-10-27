@@ -5,202 +5,198 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Revive Lookup</title>
   <style>
-    :root{
-      --bg:#0b1220; --surface:#0f172a; --card:#111a2e; --muted:#0d1526; --ink:#e6eefc; --ink-dim:#9fb0c8; --brand:#22d3a3; --brand-2:#60a5fa; --danger:#ff6b6b; --ok:#4ade80; --warn:#facc15; --border:#1f2a44; --ring:#29c6ff;
-    }
+    :root{ --bg:#0b1220; --surface:#0f172a; --card:#101a2b; --ink:#e6eefc; --dim:#9fb0c8; --brand:#22d3a3; --brand2:#60a5fa; --border:#1f2a44; --ring:#29c6ff; --danger:#ff6b6b }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:radial-gradient(1000px 600px at 85% -10%, rgba(96,165,250,.12),rgba(0,0,0,0)), radial-gradient(800px 500px at -10% 10%, rgba(34,211,163,.12),rgba(0,0,0,0)), var(--bg); color:var(--ink)}
-    header{position:sticky;top:0;z-index:30;display:flex;gap:12px;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(180deg,rgba(17,26,46,.95),rgba(11,18,32,.85));border-bottom:1px solid var(--border);backdrop-filter:blur(8px)}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--ink);background:radial-gradient(900px 500px at 85% -10%,rgba(96,165,250,.12),transparent),radial-gradient(800px 500px at -10% 10%,rgba(34,211,163,.12),transparent),var(--bg)}
+    header{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(180deg,rgba(16,26,43,.95),rgba(11,18,32,.85));border-bottom:1px solid var(--border);backdrop-filter:blur(8px)}
     header h1{margin:0;font-size:18px;letter-spacing:.35px}
-    .badge{font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid rgba(34,211,163,.35);background:rgba(34,211,163,.12);color:var(--brand)}
+    .badge{padding:6px 10px;border-radius:999px;border:1px solid rgba(34,211,163,.35);background:rgba(34,211,163,.12);color:var(--brand);font-size:12px}
     .badgered{border-color:rgba(255,107,107,.45);background:rgba(255,107,107,.12);color:var(--danger)}
-    .container{display:grid;grid-template-columns:340px 1fr 360px;gap:14px;padding:14px;min-height:calc(100vh - 60px)}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)), var(--card); border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-    .section-title{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-dim)}
-    input,button{border-radius:12px;border:1px solid var(--border);background:#0b1426;color:var(--ink);padding:10px 12px;outline:none;transition:.15s}
-    input:focus{border-color:var(--ring); box-shadow:0 0 0 3px rgba(41,198,255,.15)}
-    button{background:linear-gradient(180deg,#172235,#0e1728);cursor:pointer}
+
+    .container{display:grid;grid-template-columns:360px 1fr 360px;gap:14px;padding:14px;min-height:calc(100vh - 60px)}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01)),var(--card);border:1px solid var(--border);border-radius:16px;padding:14px}
+    .section{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin:0 0 10px}
+    input,button,textarea{border-radius:12px;border:1px solid var(--border);background:#0b1426;color:var(--ink);padding:10px 12px;outline:none;transition:.15s}
+    input:focus,textarea:focus{border-color:var(--ring);box-shadow:0 0 0 3px rgba(41,198,255,.15)}
+    button{background:linear-gradient(180deg,#172235,#0f1729);cursor:pointer}
     button:hover{transform:translateY(-1px)}
-    .primary{background:linear-gradient(180deg,#1f7f67,#155049); border-color:#21856d; box-shadow:0 8px 24px rgba(34,211,163,.18)}
+    .primary{background:linear-gradient(180deg,#1f7f67,#155049);border-color:#21856d;box-shadow:0 8px 24px rgba(34,211,163,.18)}
     .ghost{background:transparent;border-color:#2a3752}
     .warn{background:linear-gradient(180deg,#7a4600,#4a2b00);border-color:#7a4600}
+
     .row{display:flex;gap:10px;align-items:center}
     .col{display:flex;flex-direction:column;gap:10px}
     .list{display:flex;flex-direction:column;gap:10px;max-height:68vh;overflow:auto}
     .list>div{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#0b1426;border:1px solid var(--border);border-radius:14px;padding:10px}
-    .muted{color:var(--ink-dim)}
-    .table{width:100%;border-collapse:separate;border-spacing:0 10px}
-    .table thead th{font-size:12px;color:var(--ink-dim);text-align:left;font-weight:600;padding:2px 8px}
-    .tr{display:grid;grid-template-columns:1.35fr 80px 100px 110px 1.1fr 110px 36px;gap:10px;align-items:center}
-    .offer{display:flex;gap:8px;align-items:center}
-    .offer input[type=number]{width:110px}
-    input[type=range]{width:100%;height:32px;background:transparent}
-    input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:999px;background:linear-gradient(90deg,var(--brand),rgba(255,255,255,.2))}
-    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:999px;background:white;border:3px solid var(--brand);margin-top:-6px;box-shadow:0 2px 10px rgba(0,0,0,.45)}
-    .redline{outline:2px solid var(--danger)}
-    .totals{display:grid;grid-template-columns:1fr 240px;gap:14px}
-    .totals .box{background:#0b1426;border:1px solid var(--border);border-radius:16px;padding:14px}
-    .tot-line{display:flex;justify-content:space-between;margin:6px 0}
-    .tot-line strong{font-size:18px}
-    .pill{padding:6px 10px;border-radius:999px;border:1px solid #2d3b57;font-size:12px;color:var(--ink-dim)}
-    .small{font-size:12px}
+    .muted{color:var(--dim)}
+
+    .table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    .head{display:grid;grid-template-columns:1.3fr 80px 110px 110px 110px 32px;gap:8px;color:var(--dim);font-size:12px}
+    .line{display:grid;grid-template-columns:1.3fr 80px 110px 110px 110px 32px;gap:8px;align-items:center}
+    .line>div,.line>button{background:#0b1426;border:1px solid var(--border);border-radius:12px;padding:10px}
+    .line input[type=number]{width:100%}
+
+    .totals{display:grid;grid-template-columns:1fr 260px;gap:14px}
+    .box{background:#0b1426;border:1px solid var(--border);border-radius:16px;padding:14px}
+    .kv{display:flex;justify-content:space-between;margin:6px 0}
+    .kv strong{font-size:18px}
+
     .right{display:flex;flex-direction:column;gap:12px}
     .quote-list{max-height:44vh;overflow:auto}
+
     .patient-view .manager-only{display:none!important}
-    .patient-view .muted{color:#c4d0e6}
-    @media print{header,.container>.card.left,.right,.manager-only{display:none!important}body{background:white;color:black}.card{border:none}.patient-view .tr>td{background:white;border:1px solid #ccc}}
+    @media print{header,.container>.card.left,.right,.manager-only{display:none!important}body{background:white;color:black}.card{border:none}}
   </style>
 </head>
 <body>
-  <header>
-    <h1>Revive Lookup</h1>
-    <div class="row">
-      <span id="catalogStatus" class="badge">Connecting…</span>
-      <button id="toggleViewBtn" class="ghost">Switch to Patient View</button>
-      <button id="printBtn" class="ghost">Print / Save PDF</button>
-    </div>
-  </header>
+<header>
+  <h1>Revive Lookup</h1>
+  <div class="row">
+    <span id="status" class="badge">Connecting…</span>
+    <button id="patientBtn" class="ghost">Switch to Patient View</button>
+    <button id="printBtn" class="ghost">Print / Save PDF</button>
+  </div>
+</header>
 
-  <div class="container">
-    <!-- LEFT: Catalog -->
-    <div class="card left">
-      <p class="section-title">Catalog</p>
-      <div class="col">
-        <div class="row"><input id="search" placeholder="Search procedures (Hydra, PRP, Botox…)" style="flex:1"/><button id="refreshBtn" class="ghost">Refresh</button></div>
-        <div id="results" class="list"></div>
-      </div>
-    </div>
+<div class="container">
+  <!-- LEFT: Catalog -->
+  <div class="card left">
+    <p class="section">Catalog</p>
+    <div class="row"><input id="q" placeholder="Search (Hydra, PRP, Botox…)" style="flex:1"><button id="refresh" class="ghost">Refresh</button></div>
+    <div id="results" class="list"></div>
+  </div>
 
-    <!-- CENTER: Plan Builder -->
-    <div class="card">
-      <div class="row" style="justify-content:space-between;align-items:center">
-        <p class="section-title">Plan Builder</p>
-        <div class="row manager-only"><span class="pill">Floor = minimum</span><span class="pill">Red = at/below floor</span></div>
+  <!-- CENTER: Cart -->
+  <div class="card">
+    <p class="section">Plan</p>
+    <div class="head"><div>Procedure</div><div>Qty</div><div>Original</div><div>Advertised</div><div>Your Offer</div><div></div></div>
+    <div id="cart"></div>
+
+    <div class="totals" style="margin-top:10px">
+      <div class="box">
+        <div class="kv"><span class="muted">Original total</span><strong id="t_orig">—</strong></div>
+        <div class="kv"><span class="muted">Advertised baseline</span><strong id="t_adv">—</strong></div>
+        <div class="kv"><span>Patient pays</span><strong id="t_pay">—</strong></div>
+        <div class="kv"><span class="muted">Savings vs original</span><strong id="t_sav">—</strong></div>
       </div>
-      <table class="table"><thead><tr class="tr"><th>Procedure</th><th>Qty</th><th>Original</th><th>Advertised</th><th>Your Offer</th><th class="manager-only">Floor</th><th></th></tr></thead><tbody id="planBody"></tbody></table>
-      <div class="totals">
-        <div class="box">
-          <div class="tot-line"><span class="muted">Original total</span><strong id="origTotal">—</strong></div>
-          <div class="tot-line"><span class="muted">Advertised baseline</span><strong id="advTotal">—</strong></div>
-          <div class="tot-line"><span>Patient pays</span><strong id="offerTotal">—</strong></div>
-          <div class="tot-line"><span class="ok">Savings vs original</span><strong id="savings">—</strong></div>
+      <div class="box">
+        <div class="col">
+          <div class="row"><input id="patient" placeholder="Patient name" style="flex:1"><input id="label" placeholder="Quote label" style="flex:1"></div>
+          <textarea id="notes" rows="3" placeholder="Notes for patient (optional)"></textarea>
+          <div class="row"><button id="save" class="primary">Save Quote</button><button id="clear" class="warn">Clear</button></div>
         </div>
-        <div class="box">
-          <div class="row"><input id="patientName" placeholder="Patient name (optional)"/><input id="quoteLabel" placeholder="Quote label (e.g. Hydra + PRP)"/></div>
-          <div class="row" style="margin-top:8px"><button id="saveQuote" class="primary">Save Quote</button><button id="clearPlan" class="warn">Clear Plan</button></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT: Quotes & Settings -->
-    <div class="card right">
-      <p class="section-title">Saved Quotes</p>
-      <div id="quotes" class="quote-list"></div>
-      <p class="section-title" style="margin-top:8px">Connection</p>
-      <div class="col">
-        <div class="row"><input id="supabaseUrl" placeholder="Supabase URL" style="flex:1"/></div>
-        <div class="row"><input id="supabaseKey" placeholder="Supabase anon key" style="flex:1"/></div>
-        <div class="row"><button id="connectBtn" class="primary">Connect</button><button id="disconnectBtn" class="ghost">Disconnect</button></div>
-        <div class="small muted">Tip: set once — we store it locally. If your Vercel build injects globals, we auto-connect.</div>
       </div>
     </div>
   </div>
 
-  <script type="module">
-    // ---------- Supabase client ----------
-    const $ = (s)=>document.querySelector(s);
-    const currency = (n)=> (n==null||isNaN(n)) ? '—' : new Intl.NumberFormat('en-PK',{style:'currency',currency:'PKR',maximumFractionDigits:0}).format(n);
+  <!-- RIGHT: Quotes & Connection -->
+  <div class="card right">
+    <p class="section">Saved Quotes</p>
+    <div id="quotes" class="quote-list"></div>
+    <p class="section" style="margin-top:8px">Connection</p>
+    <div class="col">
+      <input id="url" placeholder="Supabase URL">
+      <input id="key" placeholder="Supabase anon key">
+      <div class="row"><button id="connect" class="primary">Connect</button><button id="disconnect" class="ghost">Disconnect</button></div>
+      <div class="muted" style="font-size:12px">Set once — saved locally. Floors are hidden but enforced automatically. If no floor is set, we use the Advertised price as the minimum.</div>
+    </div>
+  </div>
+</div>
 
-    let supa=null; let supaEnabled=false; let catalog=[]; let plan=[]; const quotesKey='revive_quotes_v3';
+<script type="module">
+  const $ = (s)=>document.querySelector(s);
+  const currency = (n)=> (n==null||isNaN(n))? '—' : new Intl.NumberFormat('en-PK',{style:'currency',currency:'PKR',maximumFractionDigits:0}).format(n);
+  const toNum=(s)=> Number(String(s).replace(/[^\d.]/g,''))||0;
 
-    async function ensureSupabase(){
-      if(supa) return supa;
-      const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-      const url = window.__SUPABASE_URL__ || localStorage.getItem('revive_supa_url') || $('#supabaseUrl').value.trim();
-      const key = window.__SUPABASE_ANON__ || localStorage.getItem('revive_supa_key') || $('#supabaseKey').value.trim();
-      if(!url || !key) throw new Error('Missing Supabase URL or anon key');
-      supa = createClient(url, key);
-      return supa;
-    }
+  let supa=null; let online=false; let catalog=[]; let cart=[]; const quotesKey='revive_quotes_v4';
 
-    function setStatus(txt, ok=true){ const el=$('#catalogStatus'); el.textContent=txt; el.className = 'badge' + (ok?'':' badgered'); }
+  async function ensureSupabase(){
+    if(supa) return supa;
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    const url = window.__SUPABASE_URL__ || localStorage.getItem('revive_supa_url') || $('#url').value.trim();
+    const key = window.__SUPABASE_ANON__ || localStorage.getItem('revive_supa_key') || $('#key').value.trim();
+    if(!url||!key) throw new Error('Missing Supabase URL or anon key');
+    supa = createClient(url,key); return supa;
+  }
 
-    async function loadCatalog(){
-      try{
-        const sb = await ensureSupabase();
-        const { data, error } = await sb.from('catalog').select('*').order('name');
-        if(error) throw error; catalog=(data||[]);
-        setStatus('Catalog: Supabase ('+catalog.length+')', true);
-        renderResults();
-      }catch(e){ setStatus('Catalog: error', false); console.error(e); alert('Supabase load failed: '+e.message); }
-    }
+  function setStatus(txt, ok=true){ const el=$('#status'); el.textContent=txt; el.className='badge'+(ok?'':' badgered'); }
 
-    async function connect(){
-      try{
-        const url=$('#supabaseUrl').value.trim(); const key=$('#supabaseKey').value.trim();
-        if(url && key){ localStorage.setItem('revive_supa_url',url); localStorage.setItem('revive_supa_key',key); }
-        await ensureSupabase(); supaEnabled=true; setStatus('Connected'); await loadCatalog(); await renderQuotes();
-      }catch(e){ setStatus('Not connected', false); alert(e.message); }
-    }
-    function disconnect(){ localStorage.removeItem('revive_supa_url'); localStorage.removeItem('revive_supa_key'); supa=null; supaEnabled=false; setStatus('Disconnected', false); }
+  async function connect(){
+    try{
+      const url=$('#url').value.trim(); const key=$('#key').value.trim();
+      if(url && key){ localStorage.setItem('revive_supa_url',url); localStorage.setItem('revive_supa_key',key); }
+      await ensureSupabase(); online=true; await loadCatalog(); await renderQuotes(); setStatus('Connected');
+    }catch(e){ online=false; setStatus('Not connected',false); alert(e.message); }
+  }
+  function disconnect(){ localStorage.removeItem('revive_supa_url'); localStorage.removeItem('revive_supa_key'); supa=null; online=false; setStatus('Disconnected',false); }
 
-    // ---------- Search / results ----------
-    function renderResults(){
-      const q = ($('#search').value||'').toLowerCase().trim(); const list=$('#results'); list.innerHTML='';
-      const items=catalog.filter(it=>!q || it.name.toLowerCase().includes(q) || (it.aliases||[]).join('|').toLowerCase().includes(q) || (it.category||'').toLowerCase().includes(q));
-      if(items.length===0){ list.innerHTML='<div class="muted small">No results.</div>'; return; }
-      items.slice(0,300).forEach(it=>{
-        const row=document.createElement('div');
-        row.innerHTML=`<div class="col" style="gap:2px"><div><strong>${it.name}</strong></div><div class="small muted">Orig ${currency(it.original)}${it.advertised?` • Adv ${currency(it.advertised)}`:''} • Floor ${currency(it.floor||0)}</div></div><button data-id="${it.id}" class="ghost">Add</button>`;
-        row.querySelector('button').addEventListener('click',()=>addToPlan(it.id));
-        list.appendChild(row);
-      });
-    }
+  async function loadCatalog(){
+    try{ const sb=await ensureSupabase(); const { data, error } = await sb.from('catalog').select('*').order('name'); if(error) throw error; catalog=data||[]; renderResults(); setStatus('Catalog: Supabase ('+catalog.length+')'); }
+    catch(e){ console.error(e); setStatus('Catalog error',false); }
+  }
 
-    function findItem(id){ return catalog.find(x=>x.id===id); }
+  function minUnit(item, qty){
+    // Minimum allowed unit: floor; if floor missing -> advertised; if missing -> original.
+    const floor = item.floor!=null? item.floor : (item.advertised!=null? item.advertised : item.original);
+    let min = floor||0;
+    // Bundles may lower per-unit if qty >= min_qty
+    (item.bundles||[]).forEach(b=>{
+      if(qty>=b.min_qty){
+        if(b.type==='unit_price_for_min_qty' && b.unit_price!=null) min = Math.max(min, b.unit_price);
+        if(b.type==='total_price_for_min_qty' && b.total_price!=null){ const u=Math.round(b.total_price/b.min_qty); min = Math.max(min, u); }
+      }
+    });
+    return min;
+  }
 
-    function addToPlan(id){ const ex=plan.find(p=>p.id===id); if(ex){ ex.qty+=1; } else { const it=findItem(id); const def=(it.advertised??it.original); plan.push({id, qty:1, offerUnit:def}); } applyBundles(); renderPlan(); }
-    function removeFromPlan(id){ plan=plan.filter(p=>p.id!==id); renderPlan(); calcTotals(); }
+  function renderResults(){
+    const q = ($('#q').value||'').toLowerCase().trim(); const list=$('#results'); list.innerHTML='';
+    const items=catalog.filter(it=> !q || it.name.toLowerCase().includes(q) || (it.aliases||[]).join('|').toLowerCase().includes(q) || (it.category||'').toLowerCase().includes(q));
+    if(items.length===0){ list.innerHTML='<div class="muted" style="font-size:12px">No results.</div>'; return; }
+    items.slice(0,250).forEach(it=>{
+      const row=document.createElement('div');
+      row.innerHTML=`<div class=col style=gap:2px><div><strong>${it.name}</strong></div><div class=muted style=font-size:12px>Orig ${currency(it.original)}${it.advertised?` • Adv ${currency(it.advertised)}`:''}</div></div><button data-id="${it.id}" class=ghost>Add</button>`;
+      row.querySelector('button').addEventListener('click',()=>add(it.id));
+      list.appendChild(row);
+    });
+  }
 
-    function applyBundles(){ plan.forEach(line=>{ const item=findItem(line.id); if(!item||!item.bundles) return; (item.bundles||[]).forEach(rule=>{ if(line.qty>=rule.min_qty){ if(rule.type==='unit_price_for_min_qty' && rule.unit_price!=null){ if(line.offerUnit>rule.unit_price) line.offerUnit=rule.unit_price; } if(rule.type==='total_price_for_min_qty' && rule.total_price!=null){ const unit=Math.round(rule.total_price/rule.min_qty); if(line.offerUnit>unit) line.offerUnit=unit; } } }); }); }
+  function add(id){ const ex=cart.find(l=>l.id===id); if(ex){ ex.qty+=1; } else { const it=catalog.find(x=>x.id===id); const start = it.advertised??it.original; cart.push({id, qty:1, offer:start}); } clampAll(); renderCart(); }
+  function removeLine(id){ cart=cart.filter(l=>l.id!==id); renderCart(); totals(); }
 
-    function renderPlan(){ const tbody=$('#planBody'); tbody.innerHTML=''; plan.forEach(line=>{ const item=findItem(line.id); if(!item) return; const adv=item.advertised??null; const floor=item.floor??0; const tr=document.createElement('tr'); tr.className='tr'; tr.innerHTML=`<td><div><strong>${item.name}</strong></div><div class=small style=color:#9fb0c8>${item.category||'—'}</div></td><td><input class=qty type=number min=1 step=1 value="${line.qty}"></td><td>${currency(item.original)}</td><td>${adv?currency(adv):'<span class=muted>—</span>'}</td><td><div class=offer><input class=range type=range min="${floor||0}" max="${item.original||0}" step=100 value="${line.offerUnit}"><input class=unit type=number step=100 value="${line.offerUnit}"></div></td><td class=manager-only>${currency(floor||0)}</td><td><button class=ghost title=Remove>✕</button></td>`; const qty=tr.querySelector('.qty'); const range=tr.querySelector('.range'); const unit=tr.querySelector('.unit'); const rm=tr.querySelector('button'); function sync(){ const v=Number(unit.value||0); if(v<=floor){ unit.classList.add('redline'); range.style.accentColor=getComputedStyle(document.documentElement).getPropertyValue('--danger'); } else { unit.classList.remove('redline'); range.style.accentColor=getComputedStyle(document.documentElement).getPropertyValue('--brand'); } }
-      qty.addEventListener('change',()=>{ line.qty=Math.max(1,parseInt(qty.value||1)); applyBundles(); calcTotals(); renderPlan(); });
-      range.addEventListener('input',()=>{ unit.value=range.value; line.offerUnit=Number(range.value); sync(); calcTotals(); });
-      unit.addEventListener('input',()=>{ let v=Number(unit.value||0); if(isNaN(v)) v=item.original; v=Math.max(0,v); unit.value=v; range.value=v; line.offerUnit=v; sync(); calcTotals(); });
-      rm.addEventListener('click',()=>removeFromPlan(line.id)); sync(); tbody.appendChild(tr); }); calcTotals(); }
+  function clampAll(){ cart.forEach(l=>{ const it=catalog.find(x=>x.id===l.id); const min=minUnit(it,l.qty); if(l.offer<min) l.offer=min; }); }
 
-    function calcTotals(){ let orig=0, adv=0, offer=0; plan.forEach(line=>{ const it=findItem(line.id); if(!it) return; orig+=(it.original||0)*line.qty; const a=(it.advertised??it.original)||0; adv+=a*line.qty; offer+=(line.offerUnit||0)*line.qty; }); $('#origTotal').textContent=currency(orig); $('#advTotal').textContent=currency(adv); $('#offerTotal').textContent=currency(offer); $('#savings').textContent=currency(Math.max(0,orig-offer)); }
+  function renderCart(){ const wrap=$('#cart'); wrap.innerHTML=''; cart.forEach(l=>{ const it=catalog.find(x=>x.id===l.id); const adv=it.advertised??null; const line=document.createElement('div'); line.className='line'; const min=minUnit(it,l.qty); line.innerHTML=`<div><div><strong>${it.name}</strong></div><div class=muted style=font-size:12px>${it.category||''}</div></div><div><input class=qty type=number min=1 step=1 value="${l.qty}"></div><div>${currency(it.original)}</div><div>${adv?currency(adv):'<span class=muted>—</span>'}</div><div><input class=offer type=number step=100 min="${min}" value="${l.offer}"></div><div><button class=ghost title=Remove>✕</button></div>`; const qty=line.querySelector('.qty'); const offer=line.querySelector('.offer'); const rm=line.querySelector('button'); qty.addEventListener('input',()=>{ l.qty=Math.max(1,parseInt(qty.value||1)); const m=minUnit(it,l.qty); if(l.offer<m){ l.offer=m; offer.value=m; } offer.min=m; totals(); }); offer.addEventListener('input',()=>{ let v=parseInt(offer.value||0); const m=minUnit(it,l.qty); if(isNaN(v)) v=m; if(v<m) v=m; offer.value=v; l.offer=v; totals(); }); rm.addEventListener('click',()=>removeLine(l.id)); wrap.appendChild(line); }); totals(); }
 
-    // ---------- Quotes (Supabase if connected, else local) ----------
-    function getLocalQuotes(){ try{return JSON.parse(localStorage.getItem(quotesKey)||'[]');}catch{return []} }
-    function setLocalQuotes(arr){ localStorage.setItem(quotesKey, JSON.stringify(arr)); }
+  function totals(){ let orig=0, adv=0, pay=0; cart.forEach(l=>{ const it=catalog.find(x=>x.id===l.id); orig+=(it.original||0)*l.qty; const a=(it.advertised??it.original)||0; adv+=a*l.qty; pay+=l.offer*l.qty; }); $('#t_orig').textContent=currency(orig); $('#t_adv').textContent=currency(adv); $('#t_pay').textContent=currency(pay); $('#t_sav').textContent=currency(Math.max(0,orig-pay)); }
 
-    async function saveQuote(){ if(plan.length===0){ alert('Add at least one item.'); return; } const id='q_'+Math.random().toString(36).slice(2,9); const items=plan.map(l=>({id:l.id, name:findItem(l.id)?.name||l.id, qty:l.qty, offerUnit:l.offerUnit})); const totals={orig:toNum($('#origTotal').textContent), adv:toNum($('#advTotal').textContent), offer:toNum($('#offerTotal').textContent)}; const q={id, ts:Date.now(), label:$('#quoteLabel').value.trim(), patient:$('#patientName').value.trim(), items, totals}; if(supaEnabled){ try{ const sb=await ensureSupabase(); const { error } = await sb.from('quotes').upsert(q); if(error) throw error; }catch(e){ console.warn(e); const old=getLocalQuotes(); old.push(q); setLocalQuotes(old); } } else { const old=getLocalQuotes(); old.push(q); setLocalQuotes(old); } await renderQuotes(); alert('Quote saved.'); }
+  // Quotes
+  function getLocal(){ try{return JSON.parse(localStorage.getItem(quotesKey)||'[]');}catch{return []} }
+  function setLocal(x){ localStorage.setItem(quotesKey, JSON.stringify(x)); }
 
-    async function renderQuotes(){ const list=$('#quotes'); list.innerHTML=''; let qs=[]; if(supaEnabled){ try{ const sb=await ensureSupabase(); const { data, error } = await sb.from('quotes').select('*').order('ts',{ascending:false}).limit(100); if(error) throw error; qs=data||[]; }catch(e){ console.warn(e); qs=getLocalQuotes().slice().reverse(); } } else { qs=getLocalQuotes().slice().reverse(); } if(qs.length===0){ list.innerHTML='<div class="muted small">No saved quotes yet.</div>'; return; } qs.forEach(q=>{ const box=document.createElement('div'); box.style.border='1px solid var(--border)'; box.style.borderRadius='12px'; box.style.padding='10px'; box.style.marginBottom='8px'; const items=(q.items||[]).map(it=>`${it.name} ×${it.qty} @ ${currency(it.offerUnit)} = ${currency(it.offerUnit*it.qty)}`).join('<br>'); box.innerHTML=`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><strong>${q.label||'Unnamed Quote'}</strong><div class=small style=color:#9fb0c8>${q.patient||'Patient N/A'} • ${new Date(q.ts).toLocaleString()}</div></div><div class=small>Total: <strong>${currency((q.totals?.offer)||0)}</strong></div></div><div class=small style=margin-top:8px>${items}</div><div class=row style=margin-top:8px><button class=ghost data-act=load>Load</button><button class=ghost data-act=export>Export</button><button class=ghost data-act=delete>Delete</button></div>`; const [load,expt,del]=box.querySelectorAll('button'); load.addEventListener('click',()=>loadQuote(q.id)); expt.addEventListener('click',()=>exportQuote(q)); del.addEventListener('click',()=>deleteQuote(q.id)); list.appendChild(box); }); }
+  async function save(){ if(cart.length===0){ alert('Add at least one item.'); return; } const id='q_'+Math.random().toString(36).slice(2,9); const items=cart.map(l=>({ id:l.id, name:catalog.find(x=>x.id===l.id)?.name||l.id, qty:l.qty, offer:l.offer })); const total=toNum($('#t_pay').textContent); const rec={ id, ts:Date.now(), label:$('#label').value.trim(), patient:$('#patient').value.trim(), notes:$('#notes').value.trim(), items, totals:{ orig:toNum($('#t_orig').textContent), adv:toNum($('#t_adv').textContent), pay:total } };
+    if(online){ try{ const sb=await ensureSupabase(); const { error } = await sb.from('quotes').upsert(rec); if(error) throw error; } catch(e){ console.warn(e); const arr=getLocal(); arr.push(rec); setLocal(arr); } } else { const arr=getLocal(); arr.push(rec); setLocal(arr); }
+    renderQuotes(); alert('Quote saved.'); }
 
-    async function loadQuote(id){ let q=null; if(supaEnabled){ const sb=await ensureSupabase(); const { data } = await sb.from('quotes').select('*').eq('id',id).maybeSingle(); q=data; } else { q=getLocalQuotes().find(x=>x.id===id); } if(!q) return; plan=(q.items||[]).map(l=>({id:l.id, qty:l.qty, offerUnit:l.offerUnit})); applyBundles(); renderPlan(); }
-    async function deleteQuote(id){ if(!confirm('Delete this quote?')) return; if(supaEnabled){ const sb=await ensureSupabase(); await sb.from('quotes').delete().eq('id',id); } else { setLocalQuotes(getLocalQuotes().filter(x=>x.id!==id)); } await renderQuotes(); }
-    function exportQuote(q){ const blob=new Blob([JSON.stringify(q,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(q.label||'quote')+'.json'; a.click(); }
+  async function renderQuotes(){ const box=$('#quotes'); box.innerHTML=''; let qs=[]; if(online){ try{ const sb=await ensureSupabase(); const { data, error } = await sb.from('quotes').select('*').order('ts',{ascending:false}).limit(100); if(error) throw error; qs=data||[]; } catch(e){ console.warn(e); qs=getLocal().slice().reverse(); } } else { qs=getLocal().slice().reverse(); } if(qs.length===0){ box.innerHTML='<div class=muted style=font-size:12px>No saved quotes yet.</div>'; return; } qs.forEach(q=>{ const card=document.createElement('div'); card.style.border='1px solid var(--border)'; card.style.borderRadius='12px'; card.style.padding='10px'; card.style.marginBottom='8px'; const items=(q.items||[]).map(it=>`${it.name} ×${it.qty} @ ${currency(it.offer)} = ${currency(it.offer*it.qty)}`).join('<br>'); card.innerHTML=`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><strong>${q.label||'Quote'}</strong><div class=muted style=font-size:12px>${q.patient||'Patient N/A'} • ${new Date(q.ts).toLocaleString()}</div></div><div class=muted style=font-size:12px>Total <strong>${currency(q.totals?.pay||0)}</strong></div></div><div class=muted style=font-size:12px;margin-top:6px>${items}</div><div class=row style=margin-top:8px><button class=ghost data-a=load>Load</button><button class=ghost data-a=del>Delete</button></div>`; const [load,del]=card.querySelectorAll('button'); load.addEventListener('click',()=>loadQuote(q.id)); del.addEventListener('click',()=>deleteQuote(q.id)); box.appendChild(card); }); }
 
-    // ---------- Helpers & bindings ----------
-    const toNum=(s)=> Number(String(s).replace(/[^\d.]/g,''))||0;
-    $('#search').addEventListener('input', renderResults);
-    $('#refreshBtn').addEventListener('click', loadCatalog);
-    $('#saveQuote').addEventListener('click', saveQuote);
-    $('#clearPlan').addEventListener('click', ()=>{ if(confirm('Clear current plan?')){ plan=[]; renderPlan(); }});
-    $('#printBtn').addEventListener('click', ()=>window.print());
-    $('#connectBtn').addEventListener('click', connect);
-    $('#disconnectBtn').addEventListener('click', ()=>{ disconnect(); renderResults(); });
-    let patient=false; function setView(){ document.body.classList.toggle('patient-view', patient); $('#toggleViewBtn').textContent = patient ? 'Switch to Manager View' : 'Switch to Patient View'; }
-    $('#toggleViewBtn').addEventListener('click', ()=>{ patient=!patient; setView(); });
+  async function loadQuote(id){ let q=null; if(online){ const sb=await ensureSupabase(); const { data } = await sb.from('quotes').select('*').eq('id',id).maybeSingle(); q=data; } else { q=getLocal().find(x=>x.id===id); } if(!q) return; cart=(q.items||[]).map(it=>({ id:it.id, qty:it.qty, offer:it.offer })); clampAll(); renderCart(); }
+  async function deleteQuote(id){ if(!confirm('Delete this quote?')) return; if(online){ const sb=await ensureSupabase(); await sb.from('quotes').delete().eq('id',id); } else { const arr=getLocal().filter(x=>x.id!==id); setLocal(arr); } renderQuotes(); }
 
-    // ---------- Init ----------
-    (async()=>{
-      try{ if((window.__SUPABASE_URL__ && window.__SUPABASE_ANON__) || (localStorage.getItem('revive_supa_url') && localStorage.getItem('revive_supa_key'))){ await connect(); } else { setStatus('Enter Supabase URL/key → Connect', false); } }catch(e){ setStatus('Not connected', false); }
-      renderQuotes(); setView();
-    })();
-  </script>
+  // Bindings
+  $('#q').addEventListener('input', renderResults);
+  $('#refresh').addEventListener('click', loadCatalog);
+  $('#save').addEventListener('click', save);
+  $('#clear').addEventListener('click', ()=>{ if(confirm('Clear plan?')){ cart=[]; renderCart(); }});
+  $('#printBtn').addEventListener('click', ()=>window.print());
+  $('#connect').addEventListener('click', connect);
+  $('#disconnect').addEventListener('click', ()=>{ disconnect(); renderQuotes(); });
+
+  let patient=false; function setPv(){ document.body.classList.toggle('patient-view',patient); $('#patientBtn').textContent = patient? 'Switch to Manager View':'Switch to Patient View'; }
+  $('#patientBtn').addEventListener('click', ()=>{ patient=!patient; setPv(); });
+
+  (async()=>{ try{ if((window.__SUPABASE_URL__&&window.__SUPABASE_ANON__)||(localStorage.getItem('revive_supa_url')&&localStorage.getItem('revive_supa_key'))){ await connect(); } else { setStatus('Enter URL & key → Connect', false); } } catch(e){ setStatus('Not connected', false); }
+    renderQuotes(); setPv(); })();
+</script>
 </body>
 </html>
