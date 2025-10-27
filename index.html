@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Revive Lookup</title>
+  <style>
+    :root{
+      --bg:#0f1216; --card:#141922; --muted:#1c2430; --ink:#eaf2ff; --ink-dim:#9fb0c8; --accent:#37c7a3; --accent-2:#2aaef6; --danger:#ff5d5d; --ok:#5ad786; --warn:#ffc857;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; background:var(--bg); color:var(--ink);}
+    header{display:flex; align-items:center; justify-content:space-between; padding:16px 20px; background:linear-gradient(180deg,#121824,#0f1216); position:sticky; top:0; z-index:50; border-bottom:1px solid #202938}
+    header h1{margin:0; font-size:18px; letter-spacing:.5px}
+    .badge{font-size:12px; padding:4px 8px; border-radius:999px; background:rgba(55,199,163,.15); color:var(--accent); border:1px solid rgba(55,199,163,.35)}
+    .container{display:grid; grid-template-columns:320px 1fr 360px; gap:14px; padding:14px}
+    .card{background:var(--card); border:1px solid #202938; border-radius:16px; padding:14px}
+    .section-title{font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--ink-dim); margin:0 0 10px}
+    input, select, button, textarea{background:#0e141c; border:1px solid #263144; color:var(--ink); border-radius:10px; padding:10px 12px; outline:none}
+    input:focus, select:focus, textarea:focus{border-color:var(--accent)}
+    button{background:linear-gradient(180deg,#1a2230,#131a25); cursor:pointer}
+    button.primary{background:linear-gradient(180deg,#1f6759,#184b42); border-color:#1b6d5c}
+    button.warn{background:linear-gradient(180deg,#6b3c00,#3a2400); border-color:#6b3c00}
+    button.ghost{background:transparent; border-color:#2a374d}
+    .row{display:flex; gap:8px; align-items:center}
+    .col{display:flex; flex-direction:column; gap:8px}
+    .spacer{height:10px}
+    .searchbox{display:flex; gap:8px}
+    .list{display:flex; flex-direction:column; gap:8px; max-height:60vh; overflow:auto}
+    .pill{padding:6px 10px; border-radius:999px; border:1px solid #2d3c53; font-size:12px; color:var(--ink-dim)}
+    .table{width:100%; border-collapse:separate; border-spacing:0 8px}
+    .table thead th{font-size:12px; color:var(--ink-dim); text-align:left; font-weight:600; padding:6px 8px}
+    .table tbody td{padding:10px 8px; background:#0e141c; border-top:1px solid #223147; border-bottom:1px solid #223147}
+    .table tbody tr{border-radius:12px;}
+    .tr{display:grid; grid-template-columns: 1.2fr 76px 90px 100px 110px 110px 30px; gap:8px; align-items:center}
+    .grid-head{display:grid; grid-template-columns: 1.2fr 76px 90px 100px 110px 110px 30px; gap:8px}
+    .qty{width:68px}
+    .price{width:100%}
+    .offer{display:flex; gap:6px; align-items:center}
+    .offer input[type=number]{width:90px}
+    .tag{font-size:11px; color:var(--ink-dim)}
+    .muted{color:var(--ink-dim)}
+    .danger{color:var(--danger)}
+    .ok{color:var(--ok)}
+    .totals{display:grid; grid-template-columns:1fr 200px; gap:12px; align-items:start}
+    .totals .box{background:#0e141c; border:1px solid #223147; border-radius:14px; padding:12px}
+    .tot-line{display:flex; justify-content:space-between; margin:6px 0}
+    .tot-line strong{font-size:16px}
+    .slider{accent-color:var(--accent)}
+    .redline{outline:2px solid var(--danger);}
+    .hidden{display:none!important}
+    .right{display:flex; flex-direction:column; gap:12px}
+    .kv{display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:6px 0; border-bottom:1px dashed #263144}
+    .kv:last-child{border-bottom:none}
+    .quote-list{max-height:40vh; overflow:auto}
+    .small{font-size:12px}
+    .ghostlink{background:none; border:none; color:var(--accent-2); padding:0; cursor:pointer}
+    .badge-red{background:rgba(255,93,93,.12); color:var(--danger); border:1px solid rgba(255,93,93,.4);}
+    .patient-view .manager-only{display:none!important}
+    .patient-view .muted{color:#b7c6db}
+    /* Print (patient view) */
+    @media print{
+      header, .container > .card.left, .right, .manager-only{display:none!important}
+      body{background:white; color:black}
+      .card{border:none}
+      .patient-view .table tbody td{background:white; border:1px solid #ccc}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Revive Lookup</h1>
+    <div class="row" style="gap:10px">
+      <span id="catalogStatus" class="badge">Catalog: Sample</span>
+      <button id="toggleViewBtn" class="ghost">Switch to Patient View</button>
+      <button id="printBtn" class="ghost">Print / Save PDF</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Left: Catalog / Import -->
+    <div class="card left">
+      <p class="section-title">Catalog</p>
+      <div class="col">
+        <div class="searchbox">
+          <input id="search" placeholder="Search procedures (e.g., Hydrafacial, PRP)" />
+          <button id="clearSearch">Clear</button>
+        </div>
+        <div class="list" id="results"></div>
+        <div class="spacer"></div>
+        <div class="col">
+          <p class="section-title">Import Catalog (CSV or JSON)</p>
+          <input type="file" id="fileInput" accept=".csv,.json" />
+          <div class="row">
+            <button id="loadFile" class="primary">Load File</button>
+            <button id="downloadTemplate" class="ghost">CSV Template</button>
+          </div>
+          <p class="small muted">Columns for CSV: <em>name,category,original,advertised,floor,aliases,bundle_type,bundle_min_qty,bundle_unit_price,bundle_total_price</em></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: Plan Builder -->
+    <div class="card">
+      <div class="row" style="justify-content:space-between; align-items:center">
+        <p class="section-title">Plan Builder</p>
+        <div class="row manager-only">
+          <span class="pill">Floor = minimum allowed</span>
+          <span class="pill">Slider/Input = your offer</span>
+          <span class="pill">Red = at/below floor</span>
+        </div>
+      </div>
+
+      <table class="table">
+        <thead class="grid-head">
+          <tr class="grid-head">
+            <th>Procedure</th>
+            <th>Qty</th>
+            <th>Original</th>
+            <th>Advertised</th>
+            <th>Your Offer</th>
+            <th class="manager-only">Floor</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="planBody"></tbody>
+      </table>
+
+      <div class="spacer"></div>
+
+      <div class="totals">
+        <div class="box">
+          <div class="tot-line"><span class="muted">Original total</span><strong id="origTotal">—</strong></div>
+          <div class="tot-line"><span class="muted">Advertised baseline</span><strong id="advTotal">—</strong></div>
+          <div class="tot-line"><span>Patient pays</span><strong id="offerTotal">—</strong></div>
+          <div class="tot-line"><span class="ok">Savings vs original</span><strong id="savings">—</strong></div>
+        </div>
+        <div class="box">
+          <div class="row">
+            <input id="patientName" placeholder="Patient name (optional)" />
+            <input id="quoteLabel" placeholder="Quote label (e.g., ‘Hydra + PRP’)" />
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button id="saveQuote" class="primary">Save Quote</button>
+            <button id="clearPlan" class="warn">Clear Plan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Quotes / Settings -->
+    <div class="card right">
+      <p class="section-title">Saved Quotes (local)</p>
+      <div id="quotes" class="quote-list"></div>
+      <div class="spacer"></div>
+      <p class="section-title">Settings</p>
+      <div class="kv"><span>Bundle rules</span><span id="bundleStatus">Auto</span></n></div>
+      <div class="kv"><span>Patient view hides floors</span><span>Yes</span></div>
+      <div class="kv"><span>Data storage</span><span>In‑browser (no cloud)</span></div>
+    </div>
+  </div>
+
+  <script>
+  /******************* Data Types *******************
+    CatalogItem = {
+      id, name, category, original, advertised|null, floor,
+      aliases:[],
+      bundles:[
+        // EITHER unit price for min qty
+        { type:"unit_price_for_min_qty", min_qty:3, unit_price:7000 },
+        // OR total price for exact min qty (e.g., 3 sessions fixed at 21000)
+        { type:"total_price_for_min_qty", min_qty:3, total_price:21000 }
+      ]
+    }
+  ***************************************************/
+
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+  let catalog = [];
+  let plan = []; // {id, qty, offerUnit}
+  const quotesKey = 'revive_quotes_v1';
+
+  function currency(n){ if(n==null||isNaN(n)) return '—'; return new Intl.NumberFormat('en-PK',{style:'currency', currency:'PKR', maximumFractionDigits:0}).format(n); }
+
+  // Sample catalog (replace via Import)
+  const sampleCatalog = [
+    {id:'prp', name:'PRP (Platelet-Rich Plasma)', category:'Skin', original:10000, advertised:7000, floor:5000, aliases:['PRP'], bundles:[{type:'total_price_for_min_qty',min_qty:3,total_price:21000}]},
+    {id:'pdrn_micro', name:'PDRN Microneedling', category:'Skin', original:15000, advertised:12000, floor:9000, aliases:['PDRN','Microneedling PDRN'], bundles:[]},
+    {id:'hydra', name:'Hydrafacial', category:'Facial', original:10000, advertised:7000, floor:5000, aliases:['Hydra','Hydra Facial'], bundles:[]},
+    {id:'meso_gluta', name:'Meso Gluta', category:'Skin', original:12000, advertised:10000, floor:8000, aliases:['Glutathione Meso'], bundles:[{type:'unit_price_for_min_qty', min_qty:3, unit_price:9000}]}
+  ];
+
+  function loadSample(){ catalog = sampleCatalog; $('#catalogStatus').textContent = 'Catalog: Sample'; renderResults(); }
+
+  // Search
+  function renderResults(){
+    const q = ($('#search').value || '').toLowerCase().trim();
+    const resultsDiv = $('#results');
+    resultsDiv.innerHTML = '';
+    const items = catalog.filter(it => !q || it.name.toLowerCase().includes(q) || (it.aliases||[]).some(a=>a.toLowerCase().includes(q)) || (it.category||'').toLowerCase().includes(q));
+    items.slice(0,100).forEach(it=>{
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.style.justifyContent='space-between';
+      row.style.padding='8px 10px';
+      row.style.background='#0e141c';
+      row.style.border='1px solid #223147';
+      row.style.borderRadius='12px';
+      row.innerHTML = `
+        <div class="col" style="gap:2px">
+          <div><strong>${it.name}</strong></div>
+          <div class="small muted">Orig ${currency(it.original)}${it.advertised?` • Adv ${currency(it.advertised)}`:''} • Floor ${currency(it.floor)}</div>
+        </div>
+        <button data-id="${it.id}">Add</button>
+      `;
+      row.querySelector('button').addEventListener('click', ()=> addToPlan(it.id));
+      resultsDiv.appendChild(row);
+    });
+  }
+
+  function findItem(id){ return catalog.find(x=>x.id===id); }
+
+  function addToPlan(id){
+    const existing = plan.find(p=>p.id===id);
+    if(existing){ existing.qty += 1; } else {
+      const item = findItem(id);
+      const defaultOffer = (item.advertised ?? item.original);
+      plan.push({ id, qty:1, offerUnit: defaultOffer });
+    }
+    applyBundles();
+    renderPlan();
+  }
+
+  function removeFromPlan(id){ plan = plan.filter(p=>p.id!==id); renderPlan(); calcTotals(); }
+
+  function applyBundles(){
+    // For each line, if a bundle rule applies, adjust offerUnit baseline (only if current offer is higher than bundle-implied unit)
+    plan.forEach(line=>{
+      const item = findItem(line.id); if(!item || !item.bundles || item.bundles.length===0) return;
+      item.bundles.forEach(rule=>{
+        if(line.qty >= rule.min_qty){
+          if(rule.type==='unit_price_for_min_qty' && rule.unit_price!=null){
+            if(line.offerUnit > rule.unit_price) line.offerUnit = rule.unit_price; // auto sweetener
+          }
+          if(rule.type==='total_price_for_min_qty' && rule.total_price!=null){
+            const unit = Math.round(rule.total_price / rule.min_qty);
+            if(line.offerUnit > unit) line.offerUnit = unit;
+          }
+        }
+      });
+    });
+  }
+
+  function renderPlan(){
+    const tbody = $('#planBody');
+    tbody.innerHTML = '';
+    plan.forEach(line=>{
+      const item = findItem(line.id); if(!item) return;
+      const tr = document.createElement('tr');
+      tr.className = 'tr';
+
+      const adv = item.advertised ?? null;
+      const floor = item.floor ?? 0;
+
+      tr.innerHTML = `
+        <td>
+          <div><strong>${item.name}</strong></div>
+          <div class="tag">${item.category || '—'}</div>
+        </td>
+        <td><input class="qty" type="number" min="1" step="1" value="${line.qty}"></td>
+        <td>${currency(item.original)}</td>
+        <td>${adv?currency(adv):'<span class="muted">—</span>'}</td>
+        <td>
+          <div class="offer">
+            <input class="price" type="range" min="${floor}" max="${item.original}" step="100" value="${line.offerUnit}">
+            <input class="unit" type="number" step="100" value="${line.offerUnit}">
+          </div>
+        </td>
+        <td class="manager-only">${currency(floor)}</td>
+        <td><button class="ghost" title="Remove">✕</button></td>
+      `;
+
+      const qtyInput = tr.querySelector('.qty');
+      const range = tr.querySelector('input[type=range]');
+      const unitInput = tr.querySelector('.unit');
+      const removeBtn = tr.querySelector('button');
+
+      function syncColor(){
+        const offer = Number(unitInput.value||0);
+        if(offer <= floor){
+          unitInput.classList.add('redline');
+          range.style.accentColor = getComputedStyle(document.documentElement).getPropertyValue('--danger');
+        } else {
+          unitInput.classList.remove('redline');
+          range.style.accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+        }
+      }
+
+      qtyInput.addEventListener('change', e=>{ line.qty = Math.max(1, parseInt(qtyInput.value||1)); applyBundles(); calcTotals(); renderPlan(); });
+      range.addEventListener('input', e=>{ unitInput.value = range.value; line.offerUnit = Number(range.value); syncColor(); calcTotals(); });
+      unitInput.addEventListener('input', e=>{ let v = Number(unitInput.value||0); if(isNaN(v)) v = item.original; v = Math.max(0, v); unitInput.value = v; range.value = v; line.offerUnit = v; syncColor(); calcTotals(); });
+      removeBtn.addEventListener('click', ()=> removeFromPlan(line.id));
+
+      syncColor();
+      tbody.appendChild(tr);
+    });
+    calcTotals();
+  }
+
+  function calcTotals(){
+    let orig=0, adv=0, offer=0;
+    plan.forEach(line=>{
+      const item = findItem(line.id); if(!item) return;
+      orig += (item.original||0) * line.qty;
+      const advUnit = (item.advertised ?? item.original) || 0;
+      adv += advUnit * line.qty;
+      offer += (line.offerUnit||0) * line.qty;
+    });
+    $('#origTotal').textContent = currency(orig);
+    $('#advTotal').textContent = currency(adv);
+    $('#offerTotal').textContent = currency(offer);
+    $('#savings').textContent = currency(Math.max(0, orig - offer));
+  }
+
+  // Quotes
+  function getQuotes(){ try{ return JSON.parse(localStorage.getItem(quotesKey)||'[]'); }catch(e){ return []; } }
+  function setQuotes(arr){ localStorage.setItem(quotesKey, JSON.stringify(arr)); }
+
+  function renderQuotes(){
+    const list = $('#quotes'); list.innerHTML='';
+    const qs = getQuotes();
+    if(qs.length===0){ list.innerHTML = '<div class="muted small">No saved quotes yet.</div>'; return; }
+    qs.slice().reverse().forEach(q=>{
+      const box = document.createElement('div');
+      box.style.border='1px solid #223147'; box.style.borderRadius='12px'; box.style.padding='10px'; box.style.marginBottom='8px';
+      const items = q.items.map(it=>`${it.name} ×${it.qty} @ ${currency(it.offerUnit)} = ${currency(it.offerUnit*it.qty)}`).join('<br>');
+      box.innerHTML = `
+        <div style="display:flex; justify-content:space-between; gap:8px; align-items:center">
+          <div>
+            <strong>${q.label || 'Unnamed Quote'}</strong>
+            <div class="small muted">${q.patient || 'Patient N/A'} • ${new Date(q.ts).toLocaleString()}</div>
+          </div>
+          <div class="small">Total: <strong>${currency(q.totals.offer)}</strong></div>
+        </div>
+        <div class="small" style="margin-top:8px">${items}</div>
+        <div class="row" style="margin-top:8px">
+          <button class="ghostlink" data-act="load" data-id="${q.id}">Load</button>
+          <button class="ghostlink" data-act="export" data-id="${q.id}">Export JSON</button>
+          <button class="ghostlink" data-act="delete" data-id="${q.id}">Delete</button>
+        </div>
+      `;
+      box.querySelectorAll('button').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const act = btn.getAttribute('data-act');
+          if(act==='load') loadQuote(q.id);
+          if(act==='export') exportQuote(q.id);
+          if(act==='delete') deleteQuote(q.id);
+        });
+      });
+      list.appendChild(box);
+    });
+  }
+
+  function saveQuote(){
+    if(plan.length===0){ alert('Add at least one item to save a quote.'); return; }
+    const qs = getQuotes();
+    const id = 'q_'+Math.random().toString(36).slice(2,9);
+    const items = plan.map(l=>({ id:l.id, name:findItem(l.id)?.name||l.id, qty:l.qty, offerUnit:l.offerUnit }));
+    const totals = {
+      orig: parseNumber($('#origTotal').textContent),
+      adv: parseNumber($('#advTotal').textContent),
+      offer: parseNumber($('#offerTotal').textContent)
+    };
+    const q = { id, ts: Date.now(), label: $('#quoteLabel').value.trim(), patient: $('#patientName').value.trim(), items, totals };
+    qs.push(q); setQuotes(qs); renderQuotes(); alert('Quote saved.');
+  }
+
+  function loadQuote(id){
+    const q = getQuotes().find(x=>x.id===id); if(!q) return;
+    plan = q.items.map(l=>({ id:l.id, qty:l.qty, offerUnit:l.offerUnit }));
+    applyBundles(); renderPlan();
+  }
+
+  function deleteQuote(id){ const qs = getQuotes().filter(x=>x.id!==id); setQuotes(qs); renderQuotes(); }
+
+  function exportQuote(id){
+    const q = getQuotes().find(x=>x.id===id); if(!q) return;
+    const blob = new Blob([JSON.stringify(q,null,2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (q.label||'quote')+'.json'; a.click();
+  }
+
+  function parseNumber(str){ return Number(String(str).replace(/[^\d.]/g,''))||0; }
+
+  // Import CSV/JSON
+  function parseCSV(text){
+    const lines = text.split(/\r?\n/).filter(x=>x.trim().length>0);
+    const headers = lines[0].split(',').map(h=>h.trim().toLowerCase());
+    const idx = (h)=> headers.indexOf(h);
+    const arr = [];
+    for(let i=1;i<lines.length;i++){
+      const raw = lines[i];
+      const cells = splitCsvRow(raw);
+      const o = {
+        id: slug((cells[idx('id')]||'') || (cells[idx('name')]||'') || ('item_'+i)),
+        name: (cells[idx('name')]||'').trim(),
+        category: (cells[idx('category')]||'').trim()||'General',
+        original: Number(cells[idx('original')]||0),
+        advertised: cells[idx('advertised')]? Number(cells[idx('advertised')]): null,
+        floor: Number(cells[idx('floor')]||0),
+        aliases: (cells[idx('aliases')]||'').split('|').map(s=>s.trim()).filter(Boolean),
+        bundles: []
+      };
+      const btype = (cells[idx('bundle_type')]||'').trim();
+      const bmin = Number(cells[idx('bundle_min_qty')]||0);
+      const bunit = cells[idx('bundle_unit_price')]? Number(cells[idx('bundle_unit_price')]): null;
+      const btotal = cells[idx('bundle_total_price')]? Number(cells[idx('bundle_total_price')]): null;
+      if(btype && bmin>0){
+        if(btype==='unit_price_for_min_qty' && bunit!=null){ o.bundles.push({type:btype,min_qty:bmin,unit_price:bunit}); }
+        if(btype==='total_price_for_min_qty' && btotal!=null){ o.bundles.push({type:btype,min_qty:bmin,total_price:btotal}); }
+      }
+      arr.push(o);
+    }
+    return arr;
+  }
+
+  function splitCsvRow(row){
+    // basic CSV parser supporting quoted commas
+    const out=[]; let cur=''; let inQ=false; for(let i=0;i<row.length;i++){
+      const c = row[i];
+      if(c==='"'){ if(inQ && row[i+1]==='"'){ cur+='"'; i++; } else { inQ=!inQ; } }
+      else if(c===',' && !inQ){ out.push(cur); cur=''; }
+      else { cur+=c; }
+    } out.push(cur); return out;
+  }
+
+  function slug(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+
+  function handleLoadFile(){
+    const f = $('#fileInput').files[0]; if(!f){ alert('Choose a CSV or JSON file.'); return; }
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        if(f.name.toLowerCase().endsWith('.json')){
+          const data = JSON.parse(reader.result);
+          catalog = Array.isArray(data)? data : data.items || [];
+        } else {
+          catalog = parseCSV(reader.result);
+        }
+        if(!Array.isArray(catalog) || catalog.length===0) throw new Error('No items found');
+        $('#catalogStatus').textContent = 'Catalog: '+f.name;
+        renderResults();
+      }catch(err){ alert('Failed to load: '+err.message); }
+    };
+    reader.readAsText(f);
+  }
+
+  function downloadTemplate(){
+    const headers = ['name','category','original','advertised','floor','aliases','bundle_type','bundle_min_qty','bundle_unit_price','bundle_total_price'];
+    const eg = [
+      ['PRP (Platelet-Rich Plasma)','Skin','10000','7000','5000','PRP','total_price_for_min_qty','3','','21000'],
+      ['PDRN Microneedling','Skin','15000','12000','9000','PDRN|Microneedling PDRN','','','',''],
+      ['Hydrafacial','Facial','10000','7000','5000','Hydra|Hydra Facial','','','','']
+    ];
+    const rows = [headers.join(',')].concat(eg.map(r=>r.map(v=>/[,\n"]/.test(v)? '"'+String(v).replace(/"/g,'""')+'"' : v).join(',')));
+    const blob = new Blob([rows.join('\n')], {type:'text/csv'});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='revive_catalog_template.csv'; a.click();
+  }
+
+  // UI Controls
+  $('#search').addEventListener('input', renderResults);
+  $('#clearSearch').addEventListener('click', ()=>{ $('#search').value=''; renderResults(); });
+  $('#loadFile').addEventListener('click', handleLoadFile);
+  $('#downloadTemplate').addEventListener('click', downloadTemplate);
+  $('#saveQuote').addEventListener('click', saveQuote);
+  $('#clearPlan').addEventListener('click', ()=>{ if(confirm('Clear current plan?')){ plan=[]; renderPlan(); }});
+  $('#printBtn').addEventListener('click', ()=> window.print());
+
+  let patientMode = false;
+  function setView(){
+    document.body.classList.toggle('patient-view', patientMode);
+    $('#toggleViewBtn').textContent = patientMode? 'Switch to Manager View' : 'Switch to Patient View';
+  }
+  $('#toggleViewBtn').addEventListener('click', ()=>{ patientMode = !patientMode; setView(); });
+
+  // Init
+  loadSample();
+  renderPlan();
+  renderQuotes();
+  setView();
+  </script>
+</body>
+</html>
