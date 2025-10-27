@@ -2,102 +2,145 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Revive Lookup</title>
   <style>
-    :root{
-      --bg:#0f1216; --card:#141922; --muted:#1c2430; --ink:#eaf2ff; --ink-dim:#9fb0c8; --accent:#37c7a3; --accent-2:#2aaef6; --danger:#ff5d5d; --ok:#5ad786; --warn:#ffc857;
-    }
+    :root{ --bg:#0b1220; --surface:#0f172a; --card:#101a2b; --ink:#e6eefc; --dim:#9fb0c8; --brand:#22d3a3; --brand2:#60a5fa; --border:#1f2a44; --ring:#29c6ff; --danger:#ff6b6b }
     *{box-sizing:border-box}
-    body{margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; background:var(--bg); color:var(--ink);}
-    header{display:flex; align-items:center; justify-content:space-between; padding:16px 20px; background:linear-gradient(180deg,#121824,#0f1216); position:sticky; top:0; z-index:50; border-bottom:1px solid #202938}
-    header h1{margin:0; font-size:18px; letter-spacing:.5px}
-    .badge{font-size:12px; padding:4px 8px; border-radius:999px; background:rgba(55,199,163,.15); color:var(--accent); border:1px solid rgba(55,199,163,.35)}
-    .container{display:grid; grid-template-columns:320px 1fr 360px; gap:14px; padding:14px}
-    .card{background:var(--card); border:1px solid #202938; border-radius:16px; padding:14px}
-    .section-title{font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--ink-dim); margin:0 0 10px}
-    input, select, button, textarea{background:#0e141c; border:1px solid #263144; color:var(--ink); border-radius:10px; padding:10px 12px; outline:none}
-    input:focus, select:focus, textarea:focus{border-color:var(--accent)}
-    button{background:linear-gradient(180deg,#1a2230,#131a25); cursor:pointer}
-    button.primary{background:linear-gradient(180deg,#1f6759,#184b42); border-color:#1b6d5c}
-    button.warn{background:linear-gradient(180deg,#6b3c00,#3a2400); border-color:#6b3c00}
-    button.ghost{background:transparent; border-color:#2a374d}
-    .row{display:flex; gap:8px; align-items:center}
-    .col{display:flex; flex-direction:column; gap:8px}
-    .spacer{height:10px}
-    .searchbox{display:flex; gap:8px}
-    .list{display:flex; flex-direction:column; gap:8px; max-height:60vh; overflow:auto}
-    .pill{padding:6px 10px; border-radius:999px; border:1px solid #2d3c53; font-size:12px; color:var(--ink-dim)}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--ink);background:radial-gradient(900px 500px at 85% -10%,rgba(96,165,250,.12),transparent),radial-gradient(800px 500px at -10% 10%,rgba(34,211,163,.12),transparent),var(--bg)}
+    header{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(180deg,rgba(16,26,43,.95),rgba(11,18,32,.85));border-bottom:1px solid var(--border);backdrop-filter:blur(8px)}
+    header h1{margin:0;font-size:18px;letter-spacing:.35px}
+    .badge{padding:6px 10px;border-radius:999px;border:1px solid rgba(34,211,163,.35);background:rgba(34,211,163,.12);color:var(--brand);font-size:12px}
 
-    /* Updated styling for plan rows */
-    .plan-box{background:#0e141c; border:1px solid #223147; border-radius:14px; margin-bottom:10px; padding:10px;}
-    .plan-header{display:grid; grid-template-columns:1.3fr 80px 110px 110px 140px 40px; gap:10px; font-size:12px; color:var(--ink-dim); margin-bottom:6px;}
-    .plan-row{display:grid; grid-template-columns:1.3fr 80px 110px 110px 140px 40px; gap:10px; align-items:center; padding:8px 0; border-top:1px dashed #263144;}
-    .plan-row:first-of-type{border-top:none;}
-    .plan-row input[type=number]{width:100%;}
+    .container{display:grid;grid-template-columns:360px 1fr 360px;gap:14px;padding:14px;min-height:calc(100vh - 60px)}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01)),var(--card);border:1px solid var(--border);border-radius:16px;padding:14px}
+    .section{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin:0 0 10px}
+    input,button,textarea{border-radius:12px;border:1px solid var(--border);background:#0b1426;color:var(--ink);padding:10px 12px;outline:none;transition:.15s}
+    input:focus,textarea:focus{border-color:var(--ring);box-shadow:0 0 0 3px rgba(41,198,255,.15)}
+    button{background:linear-gradient(180deg,#172235,#0f1729);cursor:pointer}
+    button:hover{transform:translateY(-1px)}
+    .primary{background:linear-gradient(180deg,#1f7f67,#155049);border-color:#21856d;box-shadow:0 8px 24px rgba(34,211,163,.18)}
+    .ghost{background:transparent;border-color:#2a3752}
+    .warn{background:linear-gradient(180deg,#7a4600,#4a2b00);border-color:#7a4600}
 
-    .totals{display:grid; grid-template-columns:1fr 220px; gap:12px; align-items:start}
-    .totals .box{background:#0e141c; border:1px solid #223147; border-radius:14px; padding:12px}
-    .tot-line{display:flex; justify-content:space-between; margin:6px 0}
-    .tot-line strong{font-size:16px}
-    .ok{color:var(--ok)}
+    .row{display:flex;gap:10px;align-items:center}
+    .col{display:flex;flex-direction:column;gap:10px}
+    .list{display:flex;flex-direction:column;gap:10px;max-height:68vh;overflow:auto}
+    .list>div{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#0b1426;border:1px solid var(--border);border-radius:14px;padding:10px}
+    .muted{color:var(--dim)}
+
+    /* PLAN */
+    .plan-shell{background:#0b1426;border:1px solid var(--border);border-radius:16px;padding:12px}
+    .plan-head{display:grid;grid-template-columns:1.3fr 80px 110px 110px 160px 48px;gap:12px;color:var(--dim);font-size:12px;margin:0 8px}
+    .plan-group{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+    .plan-line{display:grid;grid-template-columns:1.3fr 80px 110px 110px 160px 48px;gap:12px;align-items:center;background:#0f1729;border:1px solid #1f2a44;border-radius:12px;padding:10px}
+    .plan-line .title{font-weight:600}
+    .plan-line .sub{font-size:12px;color:var(--dim)}
+    .plan-line input[type=number]{width:100%}
+
+    .totals{display:grid;grid-template-columns:1fr 300px;gap:14px;margin-top:12px}
+    .box{background:#0b1426;border:1px solid var(--border);border-radius:16px;padding:14px}
+    .kv{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed #2a3752}
+    .kv:last-child{border-bottom:none}
+    .amount{font-weight:700;font-size:18px}
+    .savings{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,rgba(34,211,163,.18),rgba(34,211,163,.08));border:1px solid rgba(34,211,163,.35);border-radius:12px;padding:10px;margin-top:8px}
+    .savings .label{display:flex;align-items:center;gap:8px}
+    .spark{width:10px;height:10px;border-radius:999px;background:var(--brand);box-shadow:0 0 0 6px rgba(34,211,163,.18)}
   </style>
 </head>
 <body>
-  <header>
-    <h1>Revive Lookup</h1>
-    <div class="row" style="gap:10px">
-      <span id="catalogStatus" class="badge">Catalog: Sample</span>
-      <button id="toggleViewBtn" class="ghost">Switch to Patient View</button>
-      <button id="printBtn" class="ghost">Print / Save PDF</button>
-    </div>
-  </header>
+<header>
+  <h1>Revive Lookup</h1>
+  <div class="row">
+    <span id="status" class="badge">Connecting…</span>
+    <button id="printBtn" class="ghost">Print / Save PDF</button>
+  </div>
+</header>
 
-  <div class="container">
-    <!-- Left: Catalog -->
-    <div class="card left">
-      <p class="section-title">Catalog</p>
-      <div class="col">
-        <div class="searchbox">
-          <input id="search" placeholder="Search treatments..." />
-          <button id="clearSearch">Clear</button>
-        </div>
-        <div id="results" class="list"></div>
-      </div>
-    </div>
+<div class="container">
+  <!-- LEFT: Catalog -->
+  <div class="card left">
+    <p class="section">Catalog</p>
+    <div class="row"><input id="q" placeholder="Search (Hydra, PRP, Botox…)" style="flex:1"><button id="refresh" class="ghost">Refresh</button></div>
+    <div id="results" class="list"></div>
+  </div>
 
-    <!-- Center: Plan -->
-    <div class="card">
-      <p class="section-title">Plan</p>
-      <div class="plan-box">
-        <div class="plan-header">
-          <div>Procedure</div><div>Qty</div><div>Original</div><div>Discounted</div><div>Your Offer</div><div></div>
-        </div>
-        <div id="planBody"></div>
-      </div>
-
-      <div class="totals">
-        <div class="box">
-          <div class="tot-line"><span class="muted">Original total</span><strong id="origTotal">—</strong></div>
-          <div class="tot-line"><span class="muted">Discounted baseline</span><strong id="advTotal">—</strong></div>
-          <div class="tot-line"><span>Patient pays</span><strong id="offerTotal">—</strong></div>
-          <div class="tot-line ok"><span>Savings</span><strong id="savings">—</strong></div>
-        </div>
-        <div class="box">
-          <div class="col">
-            <input id="patientName" placeholder="Patient name" />
-            <input id="quoteLabel" placeholder="Quote label" />
-            <div class="row"><button id="saveQuote" class="primary">Save Quote</button><button id="clearPlan" class="warn">Clear</button></div>
-          </div>
-        </div>
-      </div>
+  <!-- CENTER: Plan -->
+  <div class="card">
+    <p class="section">Plan</p>
+    <div class="plan-shell">
+      <div class="plan-head"><div>Procedure</div><div>Qty</div><div>Original</div><div>Discounted</div><div>Your Offer</div><div></div></div>
+      <div id="plan" class="plan-group"></div>
     </div>
 
-    <!-- Right: Quotes -->
-    <div class="card right">
-      <p class="section-title">Saved Quotes</p>
-      <div id="quotes" class="list small"></div>
+    <div class="totals">
+      <div class="box">
+        <div class="kv"><span class="muted">Original total</span><span id="t_orig" class="amount">—</span></div>
+        <div class="kv"><span class="muted">Discounted baseline</span><span id="t_disc" class="amount">—</span></div>
+        <div class="kv"><span>Patient pays</span><span id="t_pay" class="amount">—</span></div>
+        <div class="savings"><div class="label"><div class="spark"></div><strong>Savings vs original</strong></div><div id="t_sav" class="amount">—</div></div>
+      </div>
+      <div class="box">
+        <div class="col">
+          <div class="row"><input id="patient" placeholder="Patient name" style="flex:1"><input id="label" placeholder="Quote label" style="flex:1"></div>
+          <textarea id="notes" rows="3" placeholder="Notes for patient (optional)"></textarea>
+          <div class="row"><button id="save" class="primary">Save Quote</button><button id="clear" class="warn">Clear</button></div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- RIGHT: Quotes -->
+  <div class="card right">
+    <p class="section">Saved Quotes</p>
+    <div id="quotes" class="list"></div>
+  </div>
+</div>
+
+<script type="module">
+  // Hard-wire Supabase creds
+  const SUPA_URL = 'https://tbmfvxsogydgfcpsqlcv.supabase.co';
+  const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRibWZ2eHNvZ3lkZ2ZjcHNxbGN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NTE5OTcsImV4cCI6MjA3NzEyNzk5N30.0WDzqjn0GNmkWMWQjlQ-OxDe2YVM0c2WCdb_GYA1yYo';
+
+  const $ = (s)=>document.querySelector(s);
+  const currency = (n)=> (n==null||isNaN(n))? '—' : new Intl.NumberFormat('en-PK',{style:'currency',currency:'PKR',maximumFractionDigits:0}).format(n);
+  const toNum=(s)=> Number(String(s).replace(/[^\d.]/g,''))||0;
+
+  let supa=null; let online=false; let catalog=[]; let cart=[]; const quotesKey='revive_quotes_v51';
+
+  async function ensureSupabase(){ if(supa) return supa; const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2'); supa=createClient(SUPA_URL,SUPA_ANON); return supa; }
+  function setStatus(txt, ok=true){ const el=$('#status'); el.textContent=txt; el.className='badge'+(ok?'':' badgered'); }
+
+  async function connect(){ try{ await ensureSupabase(); online=true; await loadCatalog(); await renderQuotes(); setStatus('Connected'); } catch(e){ online=false; setStatus('Not connected',false); console.error(e); } }
+
+  async function loadCatalog(){ const sb=await ensureSupabase(); const { data, error } = await sb.from('catalog').select('*').order('name'); if(error) throw error; catalog=data||[]; renderResults(); }
+
+  function minUnit(item, qty){ const baseMin=(item.floor!=null? item.floor : (item.advertised!=null? item.advertised : item.original))||0; let min=baseMin; (item.bundles||[]).forEach(b=>{ if(qty>=b.min_qty){ if(b.type==='unit_price_for_min_qty' && b.unit_price!=null) min=Math.max(min,b.unit_price); if(b.type==='total_price_for_min_qty' && b.total_price!=null){ const u=Math.round(b.total_price/b.min_qty); min=Math.max(min,u); } } }); return min; }
+
+  // Left list
+  function renderResults(){ const q=($('#q').value||'').toLowerCase().trim(); const list=$('#results'); list.innerHTML=''; const items=catalog.filter(it=>!q||it.name.toLowerCase().includes(q)||(it.aliases||[]).join('|').toLowerCase().includes(q)||(it.category||'').toLowerCase().includes(q)); if(items.length===0){ list.innerHTML='<div class="muted" style="font-size:12px">No results.</div>'; return; } items.slice(0,300).forEach(it=>{ const row=document.createElement('div'); row.innerHTML=`<div class=col style=gap:2px><div><strong>${it.name}</strong></div><div class=muted style=font-size:12px>Orig ${currency(it.original)}${it.advertised?` • Disc ${currency(it.advertised)}`:''}</div></div><button data-id="${it.id}" class=ghost>Add</button>`; row.querySelector('button').addEventListener('click',()=>add(it.id)); list.appendChild(row); }); }
+
+  function add(id){ const ex=cart.find(l=>l.id===id); if(ex){ ex.qty+=1; } else { const it=catalog.find(x=>x.id===id); const start = it.advertised??it.original; cart.push({id, qty:1, offer:start}); } clampAll(); renderCart(); }
+  function removeLine(id){ cart=cart.filter(l=>l.id!==id); renderCart(); totals(); }
+  function clampAll(){ cart.forEach(l=>{ const it=catalog.find(x=>x.id===l.id); const min=minUnit(it,l.qty); if(l.offer<min) l.offer=min; }); }
+
+  function renderCart(){ const wrap=$('#plan'); wrap.innerHTML=''; cart.forEach(l=>{ const it=catalog.find(x=>x.id===l.id); const disc=it.advertised??null; const min=minUnit(it,l.qty); const line=document.createElement('div'); line.className='plan-line'; line.innerHTML=`<div><div class=title>${it.name}</div><div class=sub>${it.category||''}</div></div><div><input class=qty type=number min=1 step=1 value="${l.qty}"></div><div>${currency(it.original)}</div><div>${disc?currency(disc):'<span class=muted>—</span>'}</div><div><input class=offer type=number step=100 min="${min}" value="${l.offer}"></div><div><button class=ghost title=Remove>✕</button></div>`; const qty=line.querySelector('.qty'); const offer=line.querySelector('.offer'); const rm=line.querySelector('button'); qty.addEventListener('input',()=>{ l.qty=Math.max(1,parseInt(qty.value||1)); const m=minUnit(it,l.qty); if(l.offer<m){ l.offer=m; offer.value=m; } offer.min=m; totals(); }); offer.addEventListener('input',()=>{ let v=parseInt(offer.value||0); const m=minUnit(it,l.qty); if(isNaN(v)) v=m; if(v<m) v=m; offer.value=v; l.offer=v; totals(); }); rm.addEventListener('click',()=>removeLine(l.id)); wrap.appendChild(line); }); totals(); }
+
+  function totals(){ let orig=0, disc=0, pay=0; cart.forEach(l=>{ const it=catalog.find(x=>x.id===l.id); orig+=(it.original||0)*l.qty; const d=(it.advertised??it.original)||0; disc+=d*l.qty; pay+=l.offer*l.qty; }); $('#t_orig').textContent=currency(orig); $('#t_disc').textContent=currency(disc); $('#t_pay').textContent=currency(pay); $('#t_sav').textContent=currency(Math.max(0,orig-pay)); }
+
+  // Quotes (local only for now)
+  function getLocal(){ try{return JSON.parse(localStorage.getItem(quotesKey)||'[]');}catch{return []} }
+  function setLocal(x){ localStorage.setItem(quotesKey, JSON.stringify(x)); }
+  function renderQuotes(){ const box=$('#quotes'); box.innerHTML=''; let qs=getLocal().slice().reverse(); if(qs.length===0){ box.innerHTML='<div class=muted style=font-size:12px>No saved quotes yet.</div>'; return; } qs.forEach(q=>{ const card=document.createElement('div'); card.style.border='1px solid var(--border)'; card.style.borderRadius='12px'; card.style.padding='10px'; const items=(q.items||[]).map(it=>`${it.name} ×${it.qty} @ ${currency(it.offer)} = ${currency(it.offer*it.qty)}`).join('<br>'); card.innerHTML=`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><strong>${q.label||'Quote'}</strong><div class=muted style=font-size:12px>${q.patient||'Patient N/A'} • ${new Date(q.ts).toLocaleString()}</div></div><div class=muted style=font-size:12px>Total <strong>${currency(q.totals?.pay||0)}</strong></div></div><div class=muted style=font-size:12px;margin-top:6px>${items}</div><div class=row style=margin-top:8px><button class=ghost data-a=load>Load</button><button class=ghost data-a=del>Delete</button></div>`; const [load,del]=card.querySelectorAll('button'); load.addEventListener('click',()=>loadQuote(q.id)); del.addEventListener('click',()=>deleteQuote(q.id)); box.appendChild(card); }); }
+  function save(){ if(cart.length===0){ alert('Add at least one item.'); return; } const id='q_'+Math.random().toString(36).slice(2,9); const items=cart.map(l=>({ id:l.id, name:catalog.find(x=>x.id===l.id)?.name||l.id, qty:l.qty, offer:l.offer })); const rec={ id, ts:Date.now(), label:$('#label').value.trim(), patient:$('#patient').value.trim(), notes:$('#notes').value.trim(), items, totals:{ orig:toNum($('#t_orig').textContent), disc:toNum($('#t_disc').textContent), pay:toNum($('#t_pay').textContent) } }; const arr=getLocal(); arr.push(rec); setLocal(arr); renderQuotes(); alert('Quote saved.'); }
+  function loadQuote(id){ const q=getLocal().find(x=>x.id===id); if(!q) return; cart=(q.items||[]).map(it=>({ id:it.id, qty:it.qty, offer:it.offer })); clampAll(); renderCart(); }
+  function deleteQuote(id){ const arr=getLocal().filter(x=>x.id!==id); setLocal(arr); renderQuotes(); }
+
+  // Bindings
+  $('#q').addEventListener('input', renderResults); $('#refresh').addEventListener('click', loadCatalog); $('#save').addEventListener('click', save); $('#clear').addEventListener('click', ()=>{ if(confirm('Clear plan?')){ cart=[]; renderCart(); }}); $('#printBtn').addEventListener('click', ()=>window.print());
+
+  // Init
+  (async()=>{ await connect(); renderQuotes(); })();
+</script>
 </body>
 </html>
